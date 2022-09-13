@@ -37,6 +37,10 @@ Given the authenticated nature of this API, the developer/tester should use appl
 - Commit/push any changes back to Github
 - Check the required workflow runs successfully within Github Actions
 
+**Github Secrets Setup:**
+![Deployment](notes/helloApp%20-%20repo%20secrets.JPG)
+
+
 **AWS Lambda fully deployed:**
 ![Deployment](notes/helloApp%20-%20lambda.JPG)
 
