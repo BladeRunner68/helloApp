@@ -20,7 +20,7 @@ Given the authenticated nature of this API, the developer/tester should use appl
 
 - Github (Code Repo/Secrets Management/Actions Workflow Engine)
 - Terraform (IAC - controlled Cloud infrastructure build/update via full Cloud-based state management)
-- AWS (Lambda/API Gateway (HTTP-based)/IAM/S3/Cloudwatch/IAM)
+- AWS (Lambda/API Gateway (HTTP-based)/S3/Cloudwatch/IAM)
 - Python (Sample API code)
 - Postman/Newman (For automated API testing)
 - Nodejs/NPM
