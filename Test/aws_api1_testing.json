@@ -1,0 +1,71 @@
+{
+	"info": {
+		"_postman_id": "5b836e92-950b-4332-a386-d24b9e073cb3",
+		"name": "aws_api1",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "19985787"
+	},
+	"item": [
+		{
+			"name": "gwRequest1",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{awsApiUrl}}"
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "awsv4",
+		"awsv4": {
+			"accessKey": "{{AccessKey}}",
+			"secretKey": "{{SecretKey}}",
+			"region": "{{Region}}"
+		}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Status code is 200\", function () {",
+					"    pm.response.to.have.status(200);",
+					"});",
+					"pm.test(\"Body matches string\", function () {",
+					"    pm.expect(pm.response.text()).to.include(\"hello\");",
+					"});"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "awsApiUrl",
+			"value": "changeApiURL",
+			"type": "string"
+		},
+		{
+			"key": "AccessKey",
+			"value": "changeAccessKey"
+		},
+		{
+			"key": "SecretKey",
+			"value": "changeSecretKey"
+		},
+		{
+			"key": "Region",
+			"value": "us-east-1"
+		}
+	]
+}

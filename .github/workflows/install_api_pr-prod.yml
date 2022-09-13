@@ -1,0 +1,89 @@
+## helloApp Terraform - Terraform-built infrastructure deployement
+
+name: "helloApp Terraform - push - Prod"
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  terraform_apply:
+    name: "Terraform_apply"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        id: init
+        run: |
+          cd IAC/
+          terraform init -backend-config=backend-prod.conf
+        env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_DEFAULT_REGION: ${{ secrets.REGION }}
+      
+      - name: Terraform Validate
+        id: validate
+        run: |
+          cd IAC/
+          terraform validate -no-color 
+
+      - name: Terraform Apply
+        id: apply
+        run: |
+          cd IAC/
+          terraform apply -auto-approve -var-file="variables-prod.tfvars"
+        env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_DEFAULT_REGION: ${{ secrets.REGION }}
+
+      - name: Terraform Outputs
+        id: Outputs
+        run: |
+          cd IAC/
+          echo "awsApiUrl=$(terraform output --raw app_invoke_url)" >> $GITHUB_ENV
+        env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_DEFAULT_REGION: ${{ secrets.REGION }}
+
+     # Install Node on the runner for Postman
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      # Install the newman command line utility and also install the html extra reporter
+      - name: Install newman
+        run: |
+          npm install -g newman
+          npm install -g newman-reporter-htmlextra
+
+      # Make directory to upload the test results
+      - name: Make Directory for results
+        run: mkdir -p testResults
+
+      # Run the Postman collection to initially test the new API is operational
+      - name: Run Postman API Test Collection
+        env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          newman run Test/aws_api1_testing.json --env-var "awsApiUrl=$awsApiUrl" --env-var "AccessKey=$AWS_ACCESS_KEY_ID" --env-var "SecretKey=$AWS_SECRET_ACCESS_KEY" -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html --reporter-htmlextra-darkTheme  > testResults/runreport1.html
+
+      # Upload the contents of Test Results directory to workspace
+      - name: Output the run Details
+        uses: actions/upload-artifact@v2
+        with:
+          name: RunReports
+          path: testResults
+
